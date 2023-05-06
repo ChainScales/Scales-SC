@@ -9,11 +9,11 @@ import './libs/SafeERC20.sol';
 
 contract ChainScales is Ownable {
 
-    address payable public recipient;
+    address payable public recipient; // Address for dividend contract, not replaceable
     uint256 public price;
 
     constructor(
-        address payable _recipient, // It's will be a dividend payment contract, not replaceable
+        address payable _recipient, 
         uint256 _price
     ) {
        recipient = _recipient;
@@ -86,12 +86,8 @@ contract ChainScales is Ownable {
         Change address for receiving a tokens 
     */
 
-    /* function SetupRecirient (address payable _newRecirient) external onlyOwner {
+    /* function SetupRecirient (address _newRecirient) external onlyOwner {
         recipient = _newRecirient;
-    } */
-
-    /* function WithdrawRevenue () external onlyOwner {
-        recipient.transfer(address(this).balance);
     } */
 
     // Getters
