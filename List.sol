@@ -8,18 +8,14 @@ import './libs/SafeERC20.sol';
 //SPDX-License-Identifier: Unlicense
 
 contract ChainScales is Ownable {
-    using SafeERC20 for IERC20;
 
-    IERC20 public currency;
-    address public recipient;
+    address payable public recipient;
     uint256 public price;
 
     constructor(
-        IERC20 _paymentToken,
-        address _recipient,
+        address payable _recipient, // It's will be a dividend payment contract, not replaceable
         uint256 _price
     ) {
-       currency = _paymentToken;
        recipient = _recipient;
        price = _price;
     }
@@ -37,14 +33,41 @@ contract ChainScales is Ownable {
        You can add a non - unique value but getter will return only the first owner
     */
 
-    function RegisterNewDocument (string memory NewHash) external returns (uint) {
+    function RegisterNewDocument (string memory NewHash) external payable returns (uint) {
 
-        currency.safeTransferFrom(address(msg.sender), address(recipient), price);
+        if (msg.value < price) { 
+            revert("Value is smaller than token price");
+        }
 
         address _owner = msg.sender;
         uint _creation = block.timestamp;
-
         inventionList.push(units(NewHash, _owner, _creation));
+        return inventionList.length - 1;
+
+    }
+
+    /* 
+        Working with revenue
+    */
+
+    function GetBalance () external view returns (uint) {
+        return address(this).balance;
+    }
+
+    function WithdrawBalance () external onlyOwner {
+        recipient.transfer(address(this).balance);
+    }
+
+    /*
+        Working with price 
+    */
+
+    function UpdatePrice (uint newPrice) external onlyOwner {
+        price = newPrice;
+    }
+
+    function GetPrice () external view returns (uint) {
+        return price;
     }
 
     /* 
@@ -63,9 +86,13 @@ contract ChainScales is Ownable {
         Change address for receiving a tokens 
     */
 
-    function SetupRecirient (address _newRecirient) external onlyOwner {
+    /* function SetupRecirient (address payable _newRecirient) external onlyOwner {
         recipient = _newRecirient;
-    }
+    } */
+
+    /* function WithdrawRevenue () external onlyOwner {
+        recipient.transfer(address(this).balance);
+    } */
 
     // Getters
 
